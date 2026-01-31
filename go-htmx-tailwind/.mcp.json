@@ -1,0 +1,12 @@
+{
+    "mcpServers": {
+        "encore-mcp": {
+            "args": [
+                "mcp",
+                "run",
+                "--app=g87fa"
+            ],
+            "command": "encore"
+        }
+    }
+}

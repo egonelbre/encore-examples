@@ -1,0 +1,46 @@
+{{ define "content" }} {{- /*gotype: encore.app/frontend.DashboardData*/ -}}
+
+<div class="max-w-5xl mx-auto py-12 px-4">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Dashboard</h1>
+
+    <div class="relative group">
+        <button
+            onclick="
+                this.closest('.relative')
+                    .querySelector('.carousel')
+                    .scrollBy({ left: -280, behavior: 'smooth' })
+            "
+            class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-white shadow-md rounded-full w-10 h-10 flex items-center justify-center text-gray-600 hover:text-gray-900 hover:shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+            &larr;
+        </button>
+
+        <div
+            class="carousel flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 scrollbar-hide"
+            style="-ms-overflow-style: none; scrollbar-width: none"
+        >
+            {{range .Pages}}
+            <a
+                href="{{.URL}}"
+                class="snap-start shrink-0 w-56 block rounded-xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md hover:border-indigo-300 transition"
+            >
+                <div class="text-2xl mb-3">{{.Icon}}</div>
+                <h3 class="font-semibold text-gray-900 mb-1">{{.Title}}</h3>
+                <p class="text-sm text-gray-500">{{.Subtitle}}</p>
+            </a>
+            {{end}}
+        </div>
+
+        <button
+            onclick="
+                this.closest('.relative')
+                    .querySelector('.carousel')
+                    .scrollBy({ left: 280, behavior: 'smooth' })
+            "
+            class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-white shadow-md rounded-full w-10 h-10 flex items-center justify-center text-gray-600 hover:text-gray-900 hover:shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+            &rarr;
+        </button>
+    </div>
+</div>
+{{ end }}

@@ -1,0 +1,37 @@
+{{ define "content" }}
+<div class="max-w-2xl mx-auto py-12 px-4">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">URL Shortener</h1>
+
+    <form
+        hx-post="/htmx/shorten"
+        hx-target="#url-list"
+        hx-swap="afterbegin"
+        hx-on::after-request="if(event.detail.successful) this.reset()"
+        class="bg-white rounded-lg shadow p-6 mb-8"
+    >
+        <label for="url" class="block text-sm font-medium text-gray-700 mb-2">
+            URL to shorten
+        </label>
+        <div class="flex gap-3">
+            <input
+                type="url"
+                name="url"
+                id="url"
+                required
+                placeholder="https://example.com/very/long/url"
+                class="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+            />
+            <button
+                type="submit"
+                class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 cursor-pointer"
+            >
+                Shorten
+            </button>
+        </div>
+    </form>
+
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        {{ template "url-table" . }}
+    </div>
+</div>
+{{ end }}
