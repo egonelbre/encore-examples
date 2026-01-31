@@ -1,0 +1,24 @@
+{{ define "url-table"}} {{- /*gotype: encore.app/url.ListResponse*/ -}}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Short ID</th>
+            <th>Original URL</th>
+        </tr>
+    </thead>
+    <tbody id="url-list">
+        {{range .URLs}}
+        <tr class="hover">
+            <td>
+                <code class="badge badge-ghost text-primary">{{.ID}}</code>
+            </td>
+            <td class="max-w-xs truncate">
+                <a href="{{.URL}}" target="_blank" class="link link-hover"
+                    >{{.URL}}</a
+                >
+            </td>
+        </tr>
+        {{ end }}
+    </tbody>
+</table>
+{{ end }}
