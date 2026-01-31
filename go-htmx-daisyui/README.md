@@ -1,16 +1,16 @@
-# URL Shortener with HTMX
+# URL Shortener with HTMX + DaisyUI
 
-A full-stack URL shortener built with [Encore.go](https://encore.dev), [HTMX](https://htmx.org), and [Tailwind CSS](https://tailwindcss.com). Demonstrates interactive server-rendered UIs in Go without a JavaScript framework.
+A full-stack URL shortener built with [Encore.go](https://encore.dev), [HTMX](https://htmx.org), and [DaisyUI](https://daisyui.com). Demonstrates interactive server-rendered UIs in Go without a JavaScript framework.
 
 ## Architecture
 
 The app has two services:
 
 - **`url`** — Core URL shortening logic with a PostgreSQL database.
-- **`frontend`** — Serves the web UI using Go templates, HTMX for interactivity, and Tailwind CSS for styling.
+- **`frontend`** — Serves the web UI using Go templates, HTMX for interactivity, and DaisyUI for styling.
 
 ```
-go-htmx/
+go-htmx-daisyui/
 ├── encore.app
 ├── url/
 │   ├── url.go              # API endpoints (shorten, list, get)
@@ -22,13 +22,12 @@ go-htmx/
     ├── static.go            # Static file serving
     ├── templates/
     │   ├── base.html        # Base layout
-    │   ├── dashboard.html   # Dashboard with page carousel
+    │   ├── dashboard.html   # Dashboard page
     │   ├── urls.html        # URL management page
-    │   ├── partials/        # Shared template partials
-    │   └── fragments/       # HTMX response fragments
+    │   └── partials/        # Shared template partials
     └── static/
         ├── htmx/
-        └── tailwindcss/
+        └── daisyui/
 ```
 
 ## API Endpoints
@@ -42,6 +41,7 @@ go-htmx/
 | GET    | `/urls`         | URL management page                 |
 | POST   | `/htmx/shorten` | Shorten URL (returns HTML fragment) |
 | GET    | `/htmx/urls`    | URL list (returns HTML fragment)    |
+| GET    | `/static/*path` | Static assets (HTMX, DaisyUI)      |
 
 ## Prerequisites
 
