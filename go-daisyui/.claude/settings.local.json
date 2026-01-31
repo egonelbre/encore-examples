@@ -6,5 +6,8 @@
       "mcp__acp__Write",
       "WebFetch(domain:daisyui.com)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "encore-mcp"
+  ]
 }
