@@ -1,0 +1,24 @@
+{{ define "content" }} {{- /*gotype: encore.app/frontend.DashboardData*/ -}}
+
+<div class="max-w-5xl mx-auto py-12 px-4">
+    <h1 class="text-3xl font-bold mb-8">Dashboard</h1>
+
+    <div
+        class="carousel carousel-center gap-4 p-4 bg-base-200 rounded-box w-full"
+    >
+        {{range .Pages}}
+        <a href="{{.URL}}" class="carousel-item">
+            <div
+                class="card bg-base-100 shadow-sm hover:shadow-md hover:border-primary border border-transparent transition w-56"
+            >
+                <div class="card-body">
+                    <div class="text-2xl">{{.Icon}}</div>
+                    <h3 class="card-title text-base">{{.Title}}</h3>
+                    <p class="text-sm opacity-60">{{.Subtitle}}</p>
+                </div>
+            </div>
+        </a>
+        {{end}}
+    </div>
+</div>
+{{ end }}
