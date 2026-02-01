@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__acp__Bash",
+      "mcp__acp__Edit",
+      "mcp__acp__Write",
+      "WebFetch(domain:daisyui.com)",
+      "Bash(tree:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "encore-mcp"
+  ]
+}
