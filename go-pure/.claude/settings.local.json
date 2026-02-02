@@ -5,7 +5,9 @@
       "mcp__acp__Edit",
       "mcp__acp__Write",
       "WebFetch(domain:daisyui.com)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "WebFetch(domain:hawkins.id.au)",
+      "WebFetch(domain:github.com)"
     ]
   },
   "enableAllProjectMcpServers": true,
