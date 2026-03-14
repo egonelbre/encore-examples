@@ -1,0 +1,4 @@
+encore.dev v1.52.1 h1:bXMNaysltM1OrfsKd+CxRRMRsVHYuU1jOvvR59mExy0=
+encore.dev v1.52.1/go.mod h1:lK8vSJG6uhYeUwT87/FEpcLdiN98QUcotd3gxRX0xDw=
+github.com/gorilla/schema v1.4.1 h1:jUg5hUjCSDZpNGLuXQOgIWGdlgrIdYvgQ0wZtdK1M3E=
+github.com/gorilla/schema v1.4.1/go.mod h1:Dg5SSm5PV60mhF2NFaTV1xuYYj8tV8NOPRo4FggUMnM=
