@@ -40,11 +40,13 @@ type Templates struct {
 func templatePage[T any](log *slog.Logger, ts *Templates, name, path string) func(w http.ResponseWriter, data T) error {
 	ts.pagePaths = append(ts.pagePaths, path)
 	return func(w http.ResponseWriter, data T) error {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
 		c, err := ts.get()
 		if err != nil {
+			ts.RenderError(w, err)
 			return err
 		}
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		err = c.pages[path].ExecuteTemplate(w, name, data)
 		if err != nil {
 			log.Error("failed to execute page template", "path", path, "name", name, "err", err)
@@ -55,11 +57,13 @@ func templatePage[T any](log *slog.Logger, ts *Templates, name, path string) fun
 
 func templateFragment[T any](log *slog.Logger, ts *Templates, name string) func(w http.ResponseWriter, data T) error {
 	return func(w http.ResponseWriter, data T) error {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
 		c, err := ts.get()
 		if err != nil {
+			ts.RenderError(w, err)
 			return err
 		}
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		err = c.base.ExecuteTemplate(w, name, data)
 		if err != nil {
 			log.Error("failed to execute fragment template", "name", name, "err", err)
