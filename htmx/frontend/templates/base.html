@@ -9,6 +9,7 @@
         <link href="/static/daisyui/themes.css" rel="stylesheet" type="text/css" />
         <script src="/static/daisyui/tailwind-browser.js"></script>
         <script src="/static/htmx/htmx.min.js"></script>
+        {{devScripts}}
     </head>
     <body class="{{ block "body-class" . }}min-h-screen flex flex-col{{ end }}">
         <main class="flex-1">

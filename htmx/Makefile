@@ -6,6 +6,9 @@ setup:
 teardown:
 	docker compose down
 
+dev:
+	go run . -dev
+
 run:
 	go run .
 

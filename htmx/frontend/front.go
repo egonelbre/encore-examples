@@ -2,18 +2,32 @@
 package frontend
 
 import (
+	"io"
 	"net/http"
 
 	"github.com/egonelbre/encore-example/go-pure/url"
 )
 
-type Server struct {
-	urls   *url.Service
-	router *http.ServeMux
+type Pages struct {
+	dashboardPage   func(w io.Writer, data *DashboardData) error
+	urlsPage        func(w io.Writer, data *url.ListResponse) error
+	urlListFragment func(w io.Writer, data *url.ListResponse) error
+	urlRowFragment  func(w io.Writer, data *url.URL) error
 }
 
-func NewServer(service *url.Service) *Server {
-	server := &Server{urls: service}
+type Server struct {
+	urls      *url.Service
+	templates *Templates
+	render     Pages
+	router    *http.ServeMux
+}
+
+func NewServer(service *url.Service, templates *Templates) *Server {
+	server := &Server{urls: service, templates: templates}
+
+	server.render = newPages(templates)
+	templates.MustCompile()
+
 	server.router = http.NewServeMux()
 
 	server.router.HandleFunc("GET  /", server.Dashboard)
@@ -23,7 +37,20 @@ func NewServer(service *url.Service) *Server {
 
 	server.router.HandleFunc("GET  /static/", Static)
 
+	if handler := templates.WatchHandler(); handler != nil {
+		server.router.Handle("GET /~watch.js", handler)
+	}
+
 	return server
+}
+
+func newPages(templates *Templates) Pages {
+	return Pages{
+		dashboardPage:   templatePage[*DashboardData](templates, "base", "templates/dashboard.html"),
+		urlsPage:        templatePage[*url.ListResponse](templates, "base", "templates/urls.html"),
+		urlListFragment: templateFragment[*url.ListResponse](templates, "url-list-fragment"),
+		urlRowFragment:  templateFragment[*url.URL](templates, "url-row-fragment"),
+	}
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -54,13 +81,16 @@ var dashboardData = &DashboardData{
 	},
 }
 
-// Serve serves the main page.
+// Dashboard serves the main page.
 func (s *Server) Dashboard(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	dashboardPage(w, dashboardData)
+	err := s.render.dashboardPage(w, dashboardData)
+	if err != nil {
+		s.templates.RenderError(w, err)
+	}
 }
 
-// URLs serves the main page.
+// URLs serves the URL management page.
 func (s *Server) URLs(w http.ResponseWriter, req *http.Request) {
 	resp, err := s.urls.List(req.Context())
 	if err != nil {
@@ -69,7 +99,10 @@ func (s *Server) URLs(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	urlsPage(w, resp)
+	err = s.render.urlsPage(w, resp)
+	if err != nil {
+		s.templates.RenderError(w, err)
+	}
 }
 
 // HtmxShortenURL handles the form submission and returns an HTML fragment.
@@ -92,7 +125,7 @@ func (s *Server) HtmxShortenURL(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	urlRowFragment(w, result)
+	s.render.urlRowFragment(w, result)
 }
 
 // HtmxListURLs returns the URL list as HTML fragments.
@@ -104,5 +137,5 @@ func (s *Server) HtmxListURLs(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	urlListFragment(w, resp)
+	s.render.urlListFragment(w, resp)
 }
