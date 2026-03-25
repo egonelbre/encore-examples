@@ -1,4 +1,4 @@
-{{ define "url-table"}} {{- /*gotype: encore.app/url.ListResponse*/ -}}
+{{ define "url-table"}} {{- /*gotype: github.com/egonelbre/web-examples/htmx/url.ListResponse*/ -}}
 <table class="table">
     <thead>
         <tr>
@@ -7,8 +7,8 @@
         </tr>
     </thead>
     <tbody id="url-list" hx-get="/htmx/urls">
-        {{ block "url-list-fragment" . }} {{range .URLs}} {{ block
-        "url-row-fragment" . }}
+        {{ block "url-list-fragment" . }} {{- /*gotype: github.com/egonelbre/web-examples/htmx/url.ListResponse*/ -}}
+        {{range .URLs}} {{ block "url-row-fragment" . }} {{- /*gotype: github.com/egonelbre/web-examples/htmx/url.URL*/ -}}
         <tr class="hover">
             <td>
                 <code class="badge badge-ghost text-primary">{{.ID}}</code>

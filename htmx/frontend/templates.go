@@ -30,6 +30,7 @@ type Templates struct {
 	embedFS embed.FS
 
 	pagePaths []string
+	checks    []func(fsys fs.FS) error
 	compiled  *compiled
 	err       error
 
@@ -39,6 +40,7 @@ type Templates struct {
 
 func templatePage[T any](log *slog.Logger, ts *Templates, name, path string) func(w http.ResponseWriter, data T) error {
 	ts.pagePaths = append(ts.pagePaths, path)
+	ts.checks = append(ts.checks, checkFileGoType[T](path))
 	return func(w http.ResponseWriter, data T) error {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -56,6 +58,7 @@ func templatePage[T any](log *slog.Logger, ts *Templates, name, path string) fun
 }
 
 func templateFragment[T any](log *slog.Logger, ts *Templates, name string) func(w http.ResponseWriter, data T) error {
+	ts.checks = append(ts.checks, checkBlockGoType[T](name))
 	return func(w http.ResponseWriter, data T) error {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -78,8 +81,10 @@ func (t *Templates) MustCompile() {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	t.compile()
-	if t.err != nil && !t.dev {
-		panic("failed to compile templates: " + t.err.Error())
+	typeErr := t.verifyGoTypes()
+	err := errors.Join(t.err, typeErr)
+	if err != nil && !t.dev {
+		panic("failed to compile templates: " + err.Error())
 	}
 }
 
@@ -95,6 +100,7 @@ func (t *Templates) WatchHandler() http.Handler {
 func (t *Templates) Recompile() {
 	t.mu.Lock()
 	t.compile()
+	t.verifyGoTypes()
 	t.mu.Unlock()
 
 	if t.watchjs != nil {
@@ -161,6 +167,19 @@ func (t *Templates) compile() {
 		pages: pages,
 	}
 	t.err = errors.Join(errs...)
+}
+
+// verifyGoTypes checks that template files declare the correct gotype comments.
+func (t *Templates) verifyGoTypes() error {
+	fsys := t.fsys()
+	var errs []error
+	for _, check := range t.checks {
+		if err := check(fsys); err != nil {
+			t.log.Warn("template type check failed", "err", err)
+			errs = append(errs, err)
+		}
+	}
+	return errors.Join(errs...)
 }
 
 // RenderError renders a template error page.
