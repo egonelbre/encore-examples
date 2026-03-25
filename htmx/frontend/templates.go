@@ -3,7 +3,6 @@ package frontend
 import (
 	"embed"
 	"html/template"
-	"io"
 	"io/fs"
 	"log"
 	"net/http"
@@ -34,23 +33,25 @@ type Templates struct {
 	errorPage *template.Template
 }
 
-func templatePage[T any](ts *Templates, name, path string) func(w io.Writer, data T) error {
+func templatePage[T any](ts *Templates, name, path string) func(w http.ResponseWriter, data T) error {
 	ts.pagePaths = append(ts.pagePaths, path)
-	return func(w io.Writer, data T) error {
+	return func(w http.ResponseWriter, data T) error {
 		c, err := ts.get()
 		if err != nil {
 			return err
 		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		return c.pages[path].ExecuteTemplate(w, name, data)
 	}
 }
 
-func templateFragment[T any](ts *Templates, name string) func(w io.Writer, data T) error {
-	return func(w io.Writer, data T) error {
+func templateFragment[T any](ts *Templates, name string) func(w http.ResponseWriter, data T) error {
+	return func(w http.ResponseWriter, data T) error {
 		c, err := ts.get()
 		if err != nil {
 			return err
 		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		return c.base.ExecuteTemplate(w, name, data)
 	}
 }

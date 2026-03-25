@@ -2,30 +2,29 @@
 package frontend
 
 import (
-	"io"
 	"net/http"
 
 	"github.com/egonelbre/web-examples/htmx/url"
 )
 
-type Pages struct {
-	dashboardPage   func(w io.Writer, data *DashboardData) error
-	urlsPage        func(w io.Writer, data *url.ListResponse) error
-	urlListFragment func(w io.Writer, data *url.ListResponse) error
-	urlRowFragment  func(w io.Writer, data *url.URL) error
+type Render struct {
+	DashboardPage   func(w http.ResponseWriter, data *DashboardData) error
+	UrlsPage        func(w http.ResponseWriter, data *url.ListResponse) error
+	UrlListFragment func(w http.ResponseWriter, data *url.ListResponse) error
+	UrlRowFragment  func(w http.ResponseWriter, data *url.URL) error
 }
 
 type Server struct {
 	urls      *url.Service
 	templates *Templates
-	render     Pages
+	render     Render
 	router    *http.ServeMux
 }
 
 func NewServer(service *url.Service, templates *Templates) *Server {
 	server := &Server{urls: service, templates: templates}
 
-	server.render = newPages(templates)
+	server.render = newRender(templates)
 	templates.MustCompile()
 
 	server.router = http.NewServeMux()
@@ -44,12 +43,12 @@ func NewServer(service *url.Service, templates *Templates) *Server {
 	return server
 }
 
-func newPages(templates *Templates) Pages {
-	return Pages{
-		dashboardPage:   templatePage[*DashboardData](templates, "base", "templates/dashboard.html"),
-		urlsPage:        templatePage[*url.ListResponse](templates, "base", "templates/urls.html"),
-		urlListFragment: templateFragment[*url.ListResponse](templates, "url-list-fragment"),
-		urlRowFragment:  templateFragment[*url.URL](templates, "url-row-fragment"),
+func newRender(templates *Templates) Render {
+	return Render{
+		DashboardPage:   templatePage[*DashboardData](templates, "base", "templates/dashboard.html"),
+		UrlsPage:        templatePage[*url.ListResponse](templates, "base", "templates/urls.html"),
+		UrlListFragment: templateFragment[*url.ListResponse](templates, "url-list-fragment"),
+		UrlRowFragment:  templateFragment[*url.URL](templates, "url-row-fragment"),
 	}
 }
 
@@ -83,8 +82,7 @@ var dashboardData = &DashboardData{
 
 // Dashboard serves the main page.
 func (s *Server) Dashboard(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	err := s.render.dashboardPage(w, dashboardData)
+	err := s.render.DashboardPage(w, dashboardData)
 	if err != nil {
 		s.templates.RenderError(w, err)
 	}
@@ -98,8 +96,7 @@ func (s *Server) URLs(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	err = s.render.urlsPage(w, resp)
+	err = s.render.UrlsPage(w, resp)
 	if err != nil {
 		s.templates.RenderError(w, err)
 	}
@@ -124,8 +121,7 @@ func (s *Server) HtmxShortenURL(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	s.render.urlRowFragment(w, result)
+	s.render.UrlRowFragment(w, result)
 }
 
 // HtmxListURLs returns the URL list as HTML fragments.
@@ -136,6 +132,5 @@ func (s *Server) HtmxListURLs(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	s.render.urlListFragment(w, resp)
+	s.render.UrlListFragment(w, resp)
 }
