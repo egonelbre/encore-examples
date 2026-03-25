@@ -1,4 +1,4 @@
-module github.com/egonelbre/encore-example/go-pure
+module github.com/egonelbre/web-examples/htmx
 
 go 1.25
 

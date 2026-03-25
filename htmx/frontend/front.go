@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/egonelbre/encore-example/go-pure/url"
+	"github.com/egonelbre/web-examples/htmx/url"
 )
 
 type Pages struct {

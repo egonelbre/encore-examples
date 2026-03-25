@@ -3,7 +3,7 @@ package pgdb
 import (
 	"context"
 
-	"github.com/egonelbre/encore-example/go-pure/url"
+	"github.com/egonelbre/web-examples/htmx/url"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )

@@ -7,9 +7,9 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/egonelbre/encore-example/go-pure/frontend"
-	"github.com/egonelbre/encore-example/go-pure/pgdb"
-	"github.com/egonelbre/encore-example/go-pure/url"
+	"github.com/egonelbre/web-examples/htmx/frontend"
+	"github.com/egonelbre/web-examples/htmx/pgdb"
+	"github.com/egonelbre/web-examples/htmx/url"
 )
 
 func main() {
