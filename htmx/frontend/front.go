@@ -9,10 +9,10 @@ import (
 )
 
 type Render struct {
-	DashboardPage   func(w http.ResponseWriter, data *DashboardData) error
-	UrlsPage        func(w http.ResponseWriter, data *url.ListResponse) error
-	UrlListFragment func(w http.ResponseWriter, data *url.ListResponse) error
-	UrlRowFragment  func(w http.ResponseWriter, data *url.URL) error
+	Dashboard       func(w http.ResponseWriter, data *DashboardData) error
+	URLs            func(w http.ResponseWriter, data *url.ListResponse) error
+	URLListFragment func(w http.ResponseWriter, data *url.ListResponse) error
+	URLRowFragment  func(w http.ResponseWriter, data *url.URL) error
 }
 
 type Server struct {
@@ -51,10 +51,10 @@ func NewServer(log *slog.Logger, service *url.Service, templates *Templates) *Se
 
 func newRender(log *slog.Logger, templates *Templates) Render {
 	return Render{
-		DashboardPage:   templatePage[*DashboardData](log, templates, "base", "templates/dashboard.html"),
-		UrlsPage:        templatePage[*url.ListResponse](log, templates, "base", "templates/urls.html"),
-		UrlListFragment: templateFragment[*url.ListResponse](log, templates, "url-list-fragment"),
-		UrlRowFragment:  templateFragment[*url.URL](log, templates, "url-row-fragment"),
+		Dashboard:       templatePage[*DashboardData](log, templates, "base", "templates/dashboard.html"),
+		URLs:            templatePage[*url.ListResponse](log, templates, "base", "templates/urls.html"),
+		URLListFragment: templateFragment[*url.ListResponse](log, templates, "url-list-fragment"),
+		URLRowFragment:  templateFragment[*url.URL](log, templates, "url-row-fragment"),
 	}
 }
 
@@ -88,7 +88,7 @@ var dashboardData = &DashboardData{
 
 // Dashboard serves the main page.
 func (s *Server) Dashboard(w http.ResponseWriter, req *http.Request) {
-	_ = s.render.DashboardPage(w, dashboardData)
+	_ = s.render.Dashboard(w, dashboardData)
 }
 
 // URLs serves the URL management page.
@@ -99,7 +99,7 @@ func (s *Server) URLs(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	_ = s.render.UrlsPage(w, resp)
+	_ = s.render.URLs(w, resp)
 }
 
 // HtmxShortenURL handles the form submission and returns an HTML fragment.
@@ -121,7 +121,7 @@ func (s *Server) HtmxShortenURL(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	_ = s.render.UrlRowFragment(w, result)
+	_ = s.render.URLRowFragment(w, result)
 }
 
 // HtmxListURLs returns the URL list as HTML fragments.
@@ -132,5 +132,5 @@ func (s *Server) HtmxListURLs(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	_ = s.render.UrlListFragment(w, resp)
+	_ = s.render.URLListFragment(w, resp)
 }
