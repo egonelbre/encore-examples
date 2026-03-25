@@ -1,0 +1,35 @@
+{{ define "content" }}
+<div class="max-w-2xl mx-auto py-12 px-4">
+    <h1 class="text-3xl font-bold mb-8">URL Shortener</h1>
+
+    <div class="card bg-base-100 shadow mb-8">
+        <div class="card-body">
+            <form
+                hx-post="/htmx/shorten"
+                hx-target="#url-list"
+                hx-swap="afterbegin"
+                hx-on::after-request="if(event.detail.successful) this.reset()"
+            >
+                <label for="url" class="label">URL to shorten</label>
+                <div class="flex gap-3">
+                    <input
+                        type="url"
+                        name="url"
+                        id="url"
+                        required
+                        placeholder="https://example.com/very/long/url"
+                        class="input input-bordered flex-1"
+                    />
+                    <button type="submit" class="btn btn-primary">
+                        Shorten
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card bg-base-100 shadow overflow-hidden">
+        {{ template "url-table" . }}
+    </div>
+</div>
+{{ end }}
