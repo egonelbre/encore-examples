@@ -29,15 +29,17 @@ func run(ctx context.Context, dev bool) error {
 	}
 	defer db.Close()
 
+	log := slog.Default()
+
 	var templates *frontend.Templates
 	if dev {
-		templates = frontend.NewDevTemplates("frontend")
+		templates = frontend.NewDevTemplates(log, "frontend")
 	} else {
-		templates = frontend.NewTemplates()
+		templates = frontend.NewTemplates(log)
 	}
 
 	urlService := url.NewService(db.URLs())
-	server := frontend.NewServer(urlService, templates)
+	server := frontend.NewServer(log, urlService, templates)
 
 	return http.ListenAndServe("127.0.0.1:8080", server)
 }

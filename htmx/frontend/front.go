@@ -2,6 +2,7 @@
 package frontend
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/egonelbre/web-examples/htmx/url"
@@ -15,16 +16,21 @@ type Render struct {
 }
 
 type Server struct {
+	log       *slog.Logger
 	urls      *url.Service
 	templates *Templates
-	render     Render
+	render    Render
 	router    *http.ServeMux
 }
 
-func NewServer(service *url.Service, templates *Templates) *Server {
-	server := &Server{urls: service, templates: templates}
+func NewServer(log *slog.Logger, service *url.Service, templates *Templates) *Server {
+	server := &Server{
+		log:       log,
+		urls:      service,
+		templates: templates,
+	}
 
-	server.render = newRender(templates)
+	server.render = newRender(log.WithGroup("render"), templates)
 	templates.MustCompile()
 
 	server.router = http.NewServeMux()
@@ -43,12 +49,12 @@ func NewServer(service *url.Service, templates *Templates) *Server {
 	return server
 }
 
-func newRender(templates *Templates) Render {
+func newRender(log *slog.Logger, templates *Templates) Render {
 	return Render{
-		DashboardPage:   templatePage[*DashboardData](templates, "base", "templates/dashboard.html"),
-		UrlsPage:        templatePage[*url.ListResponse](templates, "base", "templates/urls.html"),
-		UrlListFragment: templateFragment[*url.ListResponse](templates, "url-list-fragment"),
-		UrlRowFragment:  templateFragment[*url.URL](templates, "url-row-fragment"),
+		DashboardPage:   templatePage[*DashboardData](log, templates, "base", "templates/dashboard.html"),
+		UrlsPage:        templatePage[*url.ListResponse](log, templates, "base", "templates/urls.html"),
+		UrlListFragment: templateFragment[*url.ListResponse](log, templates, "url-list-fragment"),
+		UrlRowFragment:  templateFragment[*url.URL](log, templates, "url-row-fragment"),
 	}
 }
 
@@ -82,10 +88,7 @@ var dashboardData = &DashboardData{
 
 // Dashboard serves the main page.
 func (s *Server) Dashboard(w http.ResponseWriter, req *http.Request) {
-	err := s.render.DashboardPage(w, dashboardData)
-	if err != nil {
-		s.templates.RenderError(w, err)
-	}
+	_ = s.render.DashboardPage(w, dashboardData)
 }
 
 // URLs serves the URL management page.
@@ -96,10 +99,7 @@ func (s *Server) URLs(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = s.render.UrlsPage(w, resp)
-	if err != nil {
-		s.templates.RenderError(w, err)
-	}
+	_ = s.render.UrlsPage(w, resp)
 }
 
 // HtmxShortenURL handles the form submission and returns an HTML fragment.
@@ -121,7 +121,7 @@ func (s *Server) HtmxShortenURL(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	s.render.UrlRowFragment(w, result)
+	_ = s.render.UrlRowFragment(w, result)
 }
 
 // HtmxListURLs returns the URL list as HTML fragments.
@@ -132,5 +132,5 @@ func (s *Server) HtmxListURLs(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	s.render.UrlListFragment(w, resp)
+	_ = s.render.UrlListFragment(w, resp)
 }

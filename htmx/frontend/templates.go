@@ -2,9 +2,11 @@ package frontend
 
 import (
 	"embed"
+	"errors"
 	"html/template"
 	"io/fs"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"sync"
@@ -20,6 +22,8 @@ type compiled struct {
 // Templates manages HTML template compilation and rendering.
 // In dev mode, templates are loaded from disk and recompiled on changes.
 type Templates struct {
+	log *slog.Logger
+
 	mu      sync.Mutex
 	dev     bool
 	dir     string
@@ -33,7 +37,7 @@ type Templates struct {
 	errorPage *template.Template
 }
 
-func templatePage[T any](ts *Templates, name, path string) func(w http.ResponseWriter, data T) error {
+func templatePage[T any](log *slog.Logger, ts *Templates, name, path string) func(w http.ResponseWriter, data T) error {
 	ts.pagePaths = append(ts.pagePaths, path)
 	return func(w http.ResponseWriter, data T) error {
 		c, err := ts.get()
@@ -41,18 +45,26 @@ func templatePage[T any](ts *Templates, name, path string) func(w http.ResponseW
 			return err
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		return c.pages[path].ExecuteTemplate(w, name, data)
+		err = c.pages[path].ExecuteTemplate(w, name, data)
+		if err != nil {
+			log.Error("failed to execute page template", "path", path, "name", name, "err", err)
+		}
+		return err
 	}
 }
 
-func templateFragment[T any](ts *Templates, name string) func(w http.ResponseWriter, data T) error {
+func templateFragment[T any](log *slog.Logger, ts *Templates, name string) func(w http.ResponseWriter, data T) error {
 	return func(w http.ResponseWriter, data T) error {
 		c, err := ts.get()
 		if err != nil {
 			return err
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		return c.base.ExecuteTemplate(w, name, data)
+		err = c.base.ExecuteTemplate(w, name, data)
+		if err != nil {
+			log.Error("failed to execute fragment template", "name", name, "err", err)
+		}
+		return err
 	}
 }
 
@@ -121,18 +133,21 @@ func (t *Templates) compile() {
 		"templates/partials/*.html",
 	)
 	if err != nil {
+		t.log.Error("failed to compile base", "err", t.err)
 		t.compiled = nil
 		t.err = err
 		return
 	}
 
+	var errs []error
+
 	pages := make(map[string]*template.Template, len(t.pagePaths))
 	for _, path := range t.pagePaths {
 		page, err := template.Must(base.Clone()).ParseFS(fsys, path)
 		if err != nil {
-			t.compiled = nil
-			t.err = err
-			return
+			t.log.Error("failed to compile template", "err", t.err)
+			errs = append(errs, err)
+			continue
 		}
 		pages[path] = page
 	}
@@ -141,7 +156,7 @@ func (t *Templates) compile() {
 		base:  base,
 		pages: pages,
 	}
-	t.err = nil
+	t.err = errors.Join(errs...)
 }
 
 // RenderError renders a template error page.
